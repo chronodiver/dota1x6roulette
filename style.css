@@ -1,0 +1,251 @@
+:root {
+    --dota-red: #8B0000;
+    --dota-dark-red: #4a0000;
+    --dota-bg: #121212;
+    --dota-panel: #1e1e1e;
+    --dota-text: #c0c0c0;
+    --dota-gold: #ffd700;
+    --dota-border: #555;
+    --wheel-size: 350px;
+}
+
+body {
+    background-color: var(--dota-bg);
+    color: var(--dota-text);
+    font-family: 'Inter', sans-serif;
+    margin: 0;
+    padding: 0;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    min-height: 100vh;
+    background-image: radial-gradient(circle at center, #2a2a2a 0%, #000 100%);
+}
+
+.container {
+    text-align: center;
+    background: rgba(30, 30, 30, 0.9);
+    padding: 30px;
+    border-radius: 10px;
+    box-shadow: 0 0 20px rgba(0, 0, 0, 0.8), 0 0 10px var(--dota-red);
+    border: 1px solid var(--dota-border);
+    max-width: 600px;
+    width: 90%;
+}
+
+h1 {
+    font-family: 'Inter', serif;
+    color: var(--dota-text);
+    text-shadow: 2px 2px 4px #000;
+    margin-bottom: 20px;
+    letter-spacing: 2px;
+}
+
+.highlight {
+    color: var(--dota-red);
+    text-shadow: 0 0 5px var(--dota-red);
+}
+
+.roulette-container {
+    position: relative;
+    width: var(--wheel-size);
+    height: var(--wheel-size);
+    margin: 0 auto 30px;
+}
+
+.wheel {
+    width: 100%;
+    height: 100%;
+    border-radius: 50%;
+    position: relative;
+    overflow: hidden;
+    /* transition driven by JS now */
+    box-shadow: 0 0 15px rgba(0, 0, 0, 0.5);
+    border: 5px solid #333;
+}
+
+.wheel-shadow {
+    position: absolute;
+    top: -10px;
+    left: -10px;
+    right: -10px;
+    bottom: -10px;
+    border-radius: 50%;
+    box-shadow: inset 0 0 30px rgba(0, 0, 0, 0.8);
+    pointer-events: none;
+    z-index: 5;
+}
+
+.pointer {
+    position: absolute;
+    top: -20px;
+    left: 50%;
+    transform: translateX(-50%);
+    color: var(--dota-gold);
+    font-size: 40px;
+    z-index: 10;
+    filter: drop-shadow(0 2px 2px #000);
+}
+
+.center-piece {
+    position: absolute;
+    top: 50%;
+    left: 50%;
+    transform: translate(-50%, -50%);
+    width: 40px;
+    height: 40px;
+    background: radial-gradient(circle, #555, #222);
+    border-radius: 50%;
+    z-index: 6;
+    border: 2px solid #000;
+    box-shadow: 0 0 5px #000;
+}
+
+.segment {
+    position: absolute;
+    top: 0;
+    left: 50%;
+    width: 50%;
+    /* Covers half the width, height determines angle */
+    height: 50%;
+    transform-origin: 0% 100%;
+    /* Pivot from center */
+    clip-path: polygon(0% 100%, 100% 0%, 100% 100%);
+    /* Triangle shape approximation */
+    /* Exact shape handled by conic-gradient in JS usually, but here we use separate divs for text placement */
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    font-size: 12px;
+    /* Small text on wheel */
+    color: #fff;
+    font-family: 'Inter', cursive;
+    text-shadow: 1px 1px 2px #000;
+}
+
+/* Because CSS geometric segments are hard to place text on without canvas, 
+   we will use a background conic gradient for colors and absolute positioning for labels/icons if needed.
+   However, for this simple version, we'll use a canvas-like approach or just colors.
+   Let's stick to a simpler visual: just alternating colors and a label in the center/result box.
+   The wheel will be a conic gradient generated in JS. */
+
+.dota-btn {
+    background: linear-gradient(to bottom, #5a0b0b, #2b0000);
+    color: #ddd;
+    border: 1px solid #7a1b1b;
+    padding: 15px 40px;
+    font-size: 20px;
+    font-family: 'Inter', serif;
+    cursor: pointer;
+    text-transform: uppercase;
+    letter-spacing: 1.5px;
+    box-shadow: 0 4px 6px rgba(0, 0, 0, 0.5);
+    transition: all 0.2s ease;
+    outline: none;
+    margin-bottom: 20px;
+}
+
+.dota-btn:hover {
+    background: linear-gradient(to bottom, #7a1b1b, #4a0000);
+    box-shadow: 0 0 15px var(--dota-red);
+    color: #fff;
+}
+
+.dota-btn:active {
+    transform: translateY(2px);
+    box-shadow: 0 2px 4px rgba(0, 0, 0, 0.5);
+}
+
+.dota-btn:disabled {
+    background: #333;
+    color: #666;
+    border-color: #444;
+    cursor: not-allowed;
+    box-shadow: none;
+}
+
+.result-container {
+    background: rgba(0, 0, 0, 0.4);
+    border: 1px solid #444;
+    padding: 20px;
+    margin-bottom: 20px;
+    border-radius: 5px;
+}
+
+.result-container h2 {
+    margin-top: 0;
+    font-size: 18px;
+    color: #aaa;
+    font-weight: normal;
+}
+
+.result-text {
+    font-size: 24px;
+    color: var(--dota-gold);
+    font-weight: bold;
+    min-height: 1.2em;
+    font-family: 'Inter', cursive;
+    text-shadow: 0 0 5px rgba(255, 215, 0, 0.3);
+}
+
+.history-container {
+    background: rgba(0, 0, 0, 0.6);
+    padding: 15px;
+    border-radius: 5px;
+    border-top: 2px solid var(--dota-dark-red);
+    max-height: 200px;
+    overflow-y: auto;
+}
+
+.history-container h3 {
+    margin-top: 0;
+    font-size: 16px;
+    color: #888;
+    text-transform: uppercase;
+    letter-spacing: 1px;
+    border-bottom: 1px solid #333;
+    padding-bottom: 5px;
+    margin-bottom: 10px;
+}
+
+#history-list {
+    list-style: none;
+    padding: 0;
+    margin: 0;
+}
+
+#history-list li {
+    padding: 8px;
+    border-bottom: 1px solid #2a2a2a;
+    font-size: 14px;
+    color: #ccc;
+    display: flex;
+    justify-content: space-between;
+}
+
+#history-list li:last-child {
+    border-bottom: none;
+}
+
+#history-list li span.time {
+    color: #666;
+    font-size: 11px;
+}
+
+/* Scrollbar for history */
+.history-container::-webkit-scrollbar {
+    width: 8px;
+}
+
+.history-container::-webkit-scrollbar-track {
+    background: #111;
+}
+
+.history-container::-webkit-scrollbar-thumb {
+    background: #444;
+    border-radius: 4px;
+}
+
+.history-container::-webkit-scrollbar-thumb:hover {
+    background: #555;
+}
