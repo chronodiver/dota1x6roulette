@@ -96,7 +96,7 @@ export default function ProfilePage() {
         return (
             <div className="profile-page">
                 <div className="error-state">
-                    <h2>😔 {error || 'Профиль не найден'}</h2>
+                    <h2>{error || 'Профиль не найден'}</h2>
                     <p>Возможно, этот пользователь ещё не зарегистрирован.</p>
                 </div>
             </div>

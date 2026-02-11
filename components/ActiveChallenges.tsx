@@ -2,6 +2,7 @@
 
 import { useState } from 'react';
 import { DIFFICULTY_COLORS, DIFFICULTY_LABELS } from '@/lib/challenges';
+import { SpinIcon, CheckCircleIcon, XCircleIcon, StarIcon } from '@/components/Icons';
 
 interface ActiveChallenge {
     recordId: number;
@@ -23,7 +24,7 @@ export default function ActiveChallenges({ challenges, onComplete, onFail }: Act
     if (challenges.length === 0) {
         return (
             <div className="active-challenges">
-                <h3>📋 Активные задания</h3>
+                <h3><SpinIcon size={18} color="var(--blue)" /> Активные задания</h3>
                 <p className="empty-state">Нет активных заданий. Прокрутите рулетку!</p>
             </div>
         );
@@ -39,11 +40,8 @@ export default function ActiveChallenges({ challenges, onComplete, onFail }: Act
             });
             const data = await res.json();
             if (data.success) {
-                if (action === 'complete') {
-                    onComplete(recordId);
-                } else {
-                    onFail(recordId);
-                }
+                if (action === 'complete') onComplete(recordId);
+                else onFail(recordId);
             }
         } catch (err) {
             console.error(`Failed to ${action} challenge:`, err);
@@ -54,7 +52,10 @@ export default function ActiveChallenges({ challenges, onComplete, onFail }: Act
 
     return (
         <div className="active-challenges">
-            <h3>📋 Активные задания <span className="challenge-count">{challenges.length}</span></h3>
+            <h3>
+                <SpinIcon size={18} color="var(--blue)" /> Активные задания
+                <span className="challenge-count">{challenges.length}</span>
+            </h3>
             <div className="challenges-list">
                 {challenges.map(challenge => (
                     <div key={challenge.recordId} className="challenge-card">
@@ -66,7 +67,7 @@ export default function ActiveChallenges({ challenges, onComplete, onFail }: Act
                                 {DIFFICULTY_LABELS[challenge.difficulty as keyof typeof DIFFICULTY_LABELS]}
                             </span>
                             <span className="challenge-rating">
-                                {challenge.potentialRating} ⭐
+                                <StarIcon size={14} color="var(--gold)" /> {challenge.potentialRating}
                             </span>
                         </div>
                         <p className="challenge-card-text">{challenge.text}</p>
@@ -76,14 +77,14 @@ export default function ActiveChallenges({ challenges, onComplete, onFail }: Act
                                 onClick={() => handleAction(challenge.recordId, 'complete')}
                                 disabled={loadingId === challenge.recordId}
                             >
-                                ✅ Выполнил
+                                <CheckCircleIcon size={16} /> Выполнил
                             </button>
                             <button
                                 className="btn-fail"
                                 onClick={() => handleAction(challenge.recordId, 'fail')}
                                 disabled={loadingId === challenge.recordId}
                             >
-                                ❌ Провалил
+                                <XCircleIcon size={16} /> Провалил
                             </button>
                         </div>
                     </div>

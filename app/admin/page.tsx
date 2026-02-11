@@ -3,6 +3,7 @@
 import { useEffect, useState } from 'react';
 import { useRouter } from 'next/navigation';
 import { DIFFICULTY_COLORS, DIFFICULTY_LABELS } from '@/lib/challenges';
+import { SettingsIcon, PlusIcon, EditIcon, TrashIcon, ChartIcon } from '@/components/Icons';
 
 interface Challenge {
     id: number;
@@ -32,14 +33,10 @@ export default function AdminPage() {
     const [saving, setSaving] = useState(false);
 
     useEffect(() => {
-        // Check if admin
         fetch('/api/me', { cache: 'no-store' })
             .then(res => res.json())
             .then(data => {
-                if (!data.user?.isAdmin) {
-                    router.push('/');
-                    return;
-                }
+                if (!data.user?.isAdmin) { router.push('/'); return; }
                 setIsAdmin(true);
                 fetchChallenges();
             })
@@ -103,9 +100,7 @@ export default function AdminPage() {
             });
             const data = await res.json();
             if (data.success) {
-                setChallenges(prev =>
-                    prev.map(c => c.id === id ? data.challenge : c)
-                );
+                setChallenges(prev => prev.map(c => c.id === id ? data.challenge : c));
                 setEditingId(null);
             }
         } catch (err) {
@@ -141,12 +136,12 @@ export default function AdminPage() {
 
     return (
         <div className="admin-page">
-            <h1 className="page-title">⚙️ Админ-панель</h1>
+            <h1 className="page-title">Админ-панель</h1>
             <p className="page-subtitle">Управление челленджами для рулетки</p>
 
             {/* Add new challenge */}
             <div className="admin-add-section">
-                <h2>➕ Добавить челлендж</h2>
+                <h2><PlusIcon size={18} /> Добавить челлендж</h2>
                 <div className="admin-add-form">
                     <textarea
                         value={newText}
@@ -161,10 +156,10 @@ export default function AdminPage() {
                             onChange={e => setNewDifficulty(e.target.value)}
                             className="admin-select"
                         >
-                            <option value="easy">Easy (+15 ⭐)</option>
-                            <option value="normal">Normal (+25 ⭐)</option>
-                            <option value="hard">Hard (+35 ⭐)</option>
-                            <option value="insane">Insane (+45 ⭐)</option>
+                            <option value="easy">Easy (+15)</option>
+                            <option value="normal">Normal (+25)</option>
+                            <option value="hard">Hard (+35)</option>
+                            <option value="insane">Insane (+45)</option>
                         </select>
                         <button
                             onClick={handleAdd}
@@ -179,7 +174,7 @@ export default function AdminPage() {
 
             {/* Challenge list */}
             <div className="admin-challenges-section">
-                <h2>📋 Все челленджи ({challenges.length})</h2>
+                <h2><ChartIcon size={18} /> Все челленджи ({challenges.length})</h2>
                 <div className="admin-challenges-list">
                     {challenges.map(challenge => (
                         <div key={challenge.id} className="admin-challenge-card">
@@ -205,11 +200,11 @@ export default function AdminPage() {
                                         <button
                                             onClick={() => handleSave(challenge.id)}
                                             disabled={saving}
-                                            className="dota-btn admin-btn-save"
+                                            className="admin-btn-save"
                                         >
-                                            {saving ? '...' : '💾 Сохранить'}
+                                            {saving ? '...' : 'Сохранить'}
                                         </button>
-                                        <button onClick={cancelEdit} className="dota-btn admin-btn-cancel">
+                                        <button onClick={cancelEdit} className="admin-btn-cancel">
                                             Отмена
                                         </button>
                                     </div>
@@ -230,10 +225,10 @@ export default function AdminPage() {
                                     </div>
                                     <div className="admin-challenge-actions">
                                         <button onClick={() => startEdit(challenge)} className="admin-btn-edit">
-                                            ✏️
+                                            <EditIcon size={16} />
                                         </button>
                                         <button onClick={() => handleDelete(challenge.id)} className="admin-btn-delete">
-                                            🗑️
+                                            <TrashIcon size={16} />
                                         </button>
                                     </div>
                                 </>

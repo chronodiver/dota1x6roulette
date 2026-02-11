@@ -2,6 +2,7 @@
 
 import { useEffect, useState } from 'react';
 import LeaderboardTable from '@/components/LeaderboardTable';
+import { TrophyIcon } from '@/components/Icons';
 
 interface LeaderboardEntry {
     rank: number;
@@ -29,7 +30,7 @@ export default function LeaderboardPage() {
 
     return (
         <div className="leaderboard-page">
-            <h1 className="page-title">🏆 Таблица лидеров</h1>
+            <h1 className="page-title">Таблица лидеров</h1>
             <p className="page-subtitle">Лучшие игроки Dota 1x6 Challenge</p>
 
             {loading ? (
