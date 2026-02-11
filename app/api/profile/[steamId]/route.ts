@@ -1,7 +1,9 @@
 import { NextRequest, NextResponse } from 'next/server';
-import { sql } from '@/lib/db';
+import { sql } from '@vercel/postgres';
 
 export const dynamic = 'force-dynamic';
+export const revalidate = 0;
+export const fetchCache = 'force-no-store';
 
 export async function GET(
   request: NextRequest,
@@ -10,7 +12,6 @@ export async function GET(
   try {
     const { steamId } = params;
 
-    // Fetch user
     const userResult = await sql`
       SELECT id, steam_id, username, avatar_url, rating, created_at
       FROM users
@@ -23,7 +24,6 @@ export async function GET(
 
     const user = userResult.rows[0];
 
-    // Fetch stats
     const statsResult = await sql`
       SELECT 
         COUNT(CASE WHEN status = 'completed' THEN 1 END)::int as completed_count,
@@ -35,7 +35,6 @@ export async function GET(
 
     const stats = statsResult.rows[0];
 
-    // Fetch all challenge history
     const historyResult = await sql`
       SELECT 
         uc.id as record_id,
@@ -51,7 +50,7 @@ export async function GET(
       ORDER BY uc.assigned_at DESC;
     `;
 
-    const response = NextResponse.json({
+    return NextResponse.json({
       profile: {
         steamId: user.steam_id,
         username: user.username,
@@ -71,9 +70,13 @@ export async function GET(
         assignedAt: row.assigned_at,
         completedAt: row.completed_at,
       })),
+    }, {
+      headers: {
+        'Cache-Control': 'no-store, no-cache, must-revalidate, proxy-revalidate',
+        'CDN-Cache-Control': 'no-store',
+        'Vercel-CDN-Cache-Control': 'no-store',
+      },
     });
-    response.headers.set('Cache-Control', 'no-store, no-cache, must-revalidate');
-    return response;
   } catch (error) {
     console.error('Profile error:', error);
     return NextResponse.json({ error: 'Ошибка сервера' }, { status: 500 });
