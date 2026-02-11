@@ -1,7 +1,7 @@
 'use client';
 
 import { useState, useRef, useCallback, useEffect } from 'react';
-import { challenges, DIFFICULTY_COLORS, DIFFICULTY_LABELS, RATING_REWARDS } from '@/lib/challenges';
+import { DIFFICULTY_COLORS, DIFFICULTY_LABELS, RATING_REWARDS, Challenge } from '@/lib/challenges';
 
 interface SpinResult {
     recordId?: number;
@@ -81,11 +81,24 @@ export default function Roulette({ isLoggedIn, onChallengeAssigned }: RoulettePr
     const [resultHighlight, setResultHighlight] = useState(false);
     const [resultDifficulty, setResultDifficulty] = useState<string | null>(null);
     const [history, setHistory] = useState<Array<{ text: string; time: string; difficulty: string }>>([]);
+    const [challenges, setChallenges] = useState<Challenge[]>([]);
+    const [loadingChallenges, setLoadingChallenges] = useState(true);
     const currentRotationRef = useRef(0);
     const animFrameRef = useRef<number>(0);
 
+    // Fetch challenges from DB
+    useEffect(() => {
+        fetch('/api/challenges/list', { cache: 'no-store' })
+            .then(res => res.json())
+            .then(data => {
+                setChallenges(data.challenges || []);
+                setLoadingChallenges(false);
+            })
+            .catch(() => setLoadingChallenges(false));
+    }, []);
+
     const numSegments = challenges.length;
-    const segmentAngle = 360 / numSegments;
+    const segmentAngle = numSegments > 0 ? 360 / numSegments : 0;
 
     // Generate conic gradient
     const gradient = challenges.map((_, i) => {
@@ -96,7 +109,7 @@ export default function Roulette({ isLoggedIn, onChallengeAssigned }: RoulettePr
     }).join(',');
 
     const spinWheel = useCallback(() => {
-        if (isSpinning) return;
+        if (isSpinning || challenges.length === 0) return;
         initAudio();
         setIsSpinning(true);
         setResultText('Крутимся...');
@@ -173,7 +186,7 @@ export default function Roulette({ isLoggedIn, onChallengeAssigned }: RoulettePr
                             recordId: data.challenge.recordId,
                             text: challenge.text,
                             difficulty: challenge.difficulty,
-                            potentialRating: RATING_REWARDS[challenge.difficulty],
+                            potentialRating: RATING_REWARDS[challenge.difficulty as keyof typeof RATING_REWARDS],
                         });
                     }
                 } catch (err) {
@@ -183,13 +196,32 @@ export default function Roulette({ isLoggedIn, onChallengeAssigned }: RoulettePr
         };
 
         animFrameRef.current = requestAnimationFrame(animate);
-    }, [isSpinning, numSegments, segmentAngle, isLoggedIn, onChallengeAssigned]);
+    }, [isSpinning, challenges, numSegments, segmentAngle, isLoggedIn, onChallengeAssigned]);
 
     useEffect(() => {
         return () => {
             if (animFrameRef.current) cancelAnimationFrame(animFrameRef.current);
         };
     }, []);
+
+    if (loadingChallenges) {
+        return (
+            <div className="roulette-section">
+                <div className="loading-spinner">
+                    <div className="spinner"></div>
+                    <p>Загрузка челленджей...</p>
+                </div>
+            </div>
+        );
+    }
+
+    if (challenges.length === 0) {
+        return (
+            <div className="roulette-section">
+                <p>Нет доступных челленджей</p>
+            </div>
+        );
+    }
 
     return (
         <div className="roulette-section">

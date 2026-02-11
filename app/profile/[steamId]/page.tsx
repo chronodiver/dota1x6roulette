@@ -33,6 +33,17 @@ export default function ProfilePage() {
     const [challenges, setChallenges] = useState<ChallengeRecord[]>([]);
     const [loading, setLoading] = useState(true);
     const [error, setError] = useState<string | null>(null);
+    const [isAdmin, setIsAdmin] = useState(false);
+
+    useEffect(() => {
+        // Check if current user is admin
+        fetch('/api/me', { cache: 'no-store' })
+            .then(res => res.json())
+            .then(data => {
+                if (data.user?.isAdmin) setIsAdmin(true);
+            })
+            .catch(() => { });
+    }, []);
 
     useEffect(() => {
         if (!steamId) return;
@@ -52,6 +63,23 @@ export default function ProfilePage() {
                 setLoading(false);
             });
     }, [steamId]);
+
+    const handleRatingChanged = (newRating: number) => {
+        if (profile) {
+            setProfile({ ...profile, rating: newRating });
+        }
+    };
+
+    const handleChallengeDeleted = (recordId: number) => {
+        setChallenges(prev => prev.filter(c => c.recordId !== recordId));
+        // Refresh profile to get updated stats
+        fetch(`/api/profile/${steamId}`, { cache: 'no-store' })
+            .then(res => res.json())
+            .then(data => {
+                if (data.profile) setProfile(data.profile);
+            })
+            .catch(() => { });
+    };
 
     if (loading) {
         return (
@@ -85,8 +113,15 @@ export default function ProfilePage() {
                 failedCount={profile.failedCount}
                 activeCount={profile.activeCount}
                 createdAt={profile.createdAt}
+                isAdmin={isAdmin}
+                steamId={profile.steamId}
+                onRatingChanged={handleRatingChanged}
             />
-            <ChallengeHistory challenges={challenges} />
+            <ChallengeHistory
+                challenges={challenges}
+                isAdmin={isAdmin}
+                onDelete={handleChallengeDeleted}
+            />
         </div>
     );
 }

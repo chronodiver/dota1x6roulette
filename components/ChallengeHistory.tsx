@@ -14,54 +14,76 @@ interface ChallengeRecord {
 
 interface ChallengeHistoryProps {
     challenges: ChallengeRecord[];
+    isAdmin?: boolean;
+    onDelete?: (recordId: number) => void;
 }
 
-export default function ChallengeHistory({ challenges }: ChallengeHistoryProps) {
+export default function ChallengeHistory({ challenges, isAdmin, onDelete }: ChallengeHistoryProps) {
+    const handleDelete = async (recordId: number) => {
+        if (!confirm('Удалить это задание? Рейтинг будет откачен.')) return;
+        try {
+            const res = await fetch(`/api/admin/user-challenges/${recordId}`, { method: 'DELETE' });
+            const data = await res.json();
+            if (data.success && onDelete) {
+                onDelete(recordId);
+            }
+        } catch (err) {
+            console.error('Failed to delete challenge:', err);
+        }
+    };
+
     if (challenges.length === 0) {
         return (
             <div className="challenge-history">
-                <h3>📜 История заданий</h3>
-                <p className="empty-state">Ещё нет заданий</p>
+                <h2>📜 История заданий</h2>
+                <p className="empty-text">Заданий пока нет</p>
             </div>
         );
     }
 
     return (
         <div className="challenge-history">
-            <h3>📜 История заданий</h3>
-            <div className="history-grid">
+            <h2>📜 История заданий</h2>
+            <div className="challenge-grid">
                 {challenges.map(challenge => (
-                    <div key={challenge.recordId} className={`history-card status-${challenge.status}`}>
-                        <div className="history-card-top">
+                    <div
+                        key={challenge.recordId}
+                        className={`challenge-card status-${challenge.status}`}
+                    >
+                        <div className="challenge-card-header">
                             <span
                                 className="difficulty-badge"
-                                style={{ backgroundColor: DIFFICULTY_COLORS[challenge.difficulty as keyof typeof DIFFICULTY_COLORS] }}
+                                style={{
+                                    backgroundColor: DIFFICULTY_COLORS[challenge.difficulty as keyof typeof DIFFICULTY_COLORS],
+                                }}
                             >
                                 {DIFFICULTY_LABELS[challenge.difficulty as keyof typeof DIFFICULTY_LABELS]}
                             </span>
-                            <span className={`status-badge status-${challenge.status}`}>
-                                {challenge.status === 'completed' ? '✅ Выполнено' :
-                                    challenge.status === 'failed' ? '❌ Провалено' :
-                                        '⏳ Активно'}
+                            <span className={`status-badge ${challenge.status}`}>
+                                {challenge.status === 'completed' ? '✅' : challenge.status === 'failed' ? '❌' : '🔄'}
+                                {' '}
+                                {challenge.status === 'completed' ? 'Выполнено' : challenge.status === 'failed' ? 'Провалено' : 'Активно'}
                             </span>
                         </div>
-                        <p className="history-card-text">{challenge.text}</p>
-                        <div className="history-card-bottom">
+                        <p className="challenge-text">{challenge.text}</p>
+                        <div className="challenge-card-footer">
                             <span className={`rating-change ${challenge.ratingChange >= 0 ? 'positive' : 'negative'}`}>
-                                {challenge.status !== 'active' && (
-                                    <>{challenge.ratingChange > 0 ? '+' : ''}{challenge.ratingChange} ⭐</>
-                                )}
-                                {challenge.status === 'active' && (
-                                    <>±{Math.abs(challenge.ratingChange)} ⭐</>
-                                )}
+                                {challenge.status === 'active'
+                                    ? `±${challenge.ratingChange} ⭐`
+                                    : `${challenge.ratingChange >= 0 ? '+' : ''}${challenge.ratingChange} ⭐`}
                             </span>
-                            <span className="history-date">
-                                {new Date(challenge.assignedAt).toLocaleDateString('ru-RU', {
-                                    day: 'numeric',
-                                    month: 'short',
-                                    year: 'numeric',
-                                })}
+                            <span className="challenge-date">
+                                {new Date(challenge.assignedAt).toLocaleDateString('ru-RU')}
                             </span>
+                            {isAdmin && (
+                                <button
+                                    className="admin-btn-delete-small"
+                                    onClick={() => handleDelete(challenge.recordId)}
+                                    title="Удалить задание"
+                                >
+                                    🗑️
+                                </button>
+                            )}
                         </div>
                     </div>
                 ))}

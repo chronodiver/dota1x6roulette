@@ -9,6 +9,7 @@ interface User {
     username: string;
     avatarUrl: string;
     rating: number;
+    isAdmin?: boolean;
 }
 
 export default function Navbar() {
@@ -61,6 +62,15 @@ export default function Navbar() {
                                     >
                                         👤 Профиль
                                     </Link>
+                                    {user.isAdmin && (
+                                        <Link
+                                            href="/admin"
+                                            className="nav-link admin-link"
+                                            onClick={() => setMobileMenuOpen(false)}
+                                        >
+                                            ⚙️ Админ
+                                        </Link>
+                                    )}
                                     <div className="navbar-user">
                                         <img src={user.avatarUrl} alt={user.username} className="navbar-avatar" />
                                         <span className="navbar-username">{user.username}</span>
