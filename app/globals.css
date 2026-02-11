@@ -501,7 +501,7 @@ main,
   font-family: 'Radiance', sans-serif;
   font-size: 22px;
   font-weight: 600;
-  color: var(--text-secondary);
+  color: #c8cfd4;
   padding: 16px 24px;
   background: var(--bg-card);
   border: 1px solid var(--border);
