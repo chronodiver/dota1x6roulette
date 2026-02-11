@@ -4,6 +4,8 @@ import { cookies } from 'next/headers';
 import { sessionOptions, SessionData } from '@/lib/session';
 import { sql } from '@/lib/db';
 
+export const dynamic = 'force-dynamic';
+
 export async function GET() {
     const session = await getIronSession<SessionData>(await cookies(), sessionOptions);
 

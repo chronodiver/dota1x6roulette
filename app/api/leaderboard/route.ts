@@ -1,6 +1,8 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { sql } from '@/lib/db';
 
+export const dynamic = 'force-dynamic';
+
 export async function GET(request: NextRequest) {
     try {
         const url = new URL(request.url);
@@ -22,7 +24,7 @@ export async function GET(request: NextRequest) {
       LIMIT ${limit};
     `;
 
-        return NextResponse.json({
+        const response = NextResponse.json({
             leaderboard: result.rows.map((row, index) => ({
                 rank: index + 1,
                 steamId: row.steam_id,
@@ -33,6 +35,8 @@ export async function GET(request: NextRequest) {
                 failedCount: row.failed_count,
             })),
         });
+        response.headers.set('Cache-Control', 'no-store, no-cache, must-revalidate');
+        return response;
     } catch (error) {
         console.error('Leaderboard error:', error);
         return NextResponse.json({ error: 'Ошибка сервера' }, { status: 500 });

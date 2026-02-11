@@ -1,28 +1,30 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { sql } from '@/lib/db';
 
-export async function GET(
-    request: NextRequest,
-    { params }: { params: { steamId: string } }
-) {
-    try {
-        const { steamId } = params;
+export const dynamic = 'force-dynamic';
 
-        // Fetch user
-        const userResult = await sql`
+export async function GET(
+  request: NextRequest,
+  { params }: { params: { steamId: string } }
+) {
+  try {
+    const { steamId } = params;
+
+    // Fetch user
+    const userResult = await sql`
       SELECT id, steam_id, username, avatar_url, rating, created_at
       FROM users
       WHERE steam_id = ${steamId};
     `;
 
-        if (userResult.rows.length === 0) {
-            return NextResponse.json({ error: 'Пользователь не найден' }, { status: 404 });
-        }
+    if (userResult.rows.length === 0) {
+      return NextResponse.json({ error: 'Пользователь не найден' }, { status: 404 });
+    }
 
-        const user = userResult.rows[0];
+    const user = userResult.rows[0];
 
-        // Fetch stats
-        const statsResult = await sql`
+    // Fetch stats
+    const statsResult = await sql`
       SELECT 
         COUNT(CASE WHEN status = 'completed' THEN 1 END)::int as completed_count,
         COUNT(CASE WHEN status = 'failed' THEN 1 END)::int as failed_count,
@@ -31,10 +33,10 @@ export async function GET(
       WHERE user_id = ${user.id};
     `;
 
-        const stats = statsResult.rows[0];
+    const stats = statsResult.rows[0];
 
-        // Fetch all challenge history
-        const historyResult = await sql`
+    // Fetch all challenge history
+    const historyResult = await sql`
       SELECT 
         uc.id as record_id,
         c.text,
@@ -49,29 +51,31 @@ export async function GET(
       ORDER BY uc.assigned_at DESC;
     `;
 
-        return NextResponse.json({
-            profile: {
-                steamId: user.steam_id,
-                username: user.username,
-                avatarUrl: user.avatar_url,
-                rating: user.rating,
-                createdAt: user.created_at,
-                completedCount: stats.completed_count,
-                failedCount: stats.failed_count,
-                activeCount: stats.active_count,
-            },
-            challenges: historyResult.rows.map(row => ({
-                recordId: row.record_id,
-                text: row.text,
-                difficulty: row.difficulty,
-                status: row.status,
-                ratingChange: row.rating_change,
-                assignedAt: row.assigned_at,
-                completedAt: row.completed_at,
-            })),
-        });
-    } catch (error) {
-        console.error('Profile error:', error);
-        return NextResponse.json({ error: 'Ошибка сервера' }, { status: 500 });
-    }
+    const response = NextResponse.json({
+      profile: {
+        steamId: user.steam_id,
+        username: user.username,
+        avatarUrl: user.avatar_url,
+        rating: user.rating,
+        createdAt: user.created_at,
+        completedCount: stats.completed_count,
+        failedCount: stats.failed_count,
+        activeCount: stats.active_count,
+      },
+      challenges: historyResult.rows.map(row => ({
+        recordId: row.record_id,
+        text: row.text,
+        difficulty: row.difficulty,
+        status: row.status,
+        ratingChange: row.rating_change,
+        assignedAt: row.assigned_at,
+        completedAt: row.completed_at,
+      })),
+    });
+    response.headers.set('Cache-Control', 'no-store, no-cache, must-revalidate');
+    return response;
+  } catch (error) {
+    console.error('Profile error:', error);
+    return NextResponse.json({ error: 'Ошибка сервера' }, { status: 500 });
+  }
 }

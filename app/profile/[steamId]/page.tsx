@@ -37,7 +37,7 @@ export default function ProfilePage() {
     useEffect(() => {
         if (!steamId) return;
 
-        fetch(`/api/profile/${steamId}`)
+        fetch(`/api/profile/${steamId}`, { cache: 'no-store' })
             .then(res => {
                 if (!res.ok) throw new Error('Профиль не найден');
                 return res.json();
