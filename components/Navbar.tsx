@@ -6,8 +6,8 @@ import { TrophyIcon, UserIcon, SettingsIcon, LogoutIcon, StarIcon, SteamIcon } f
 
 interface User {
     username: string;
-    avatar_url: string;
-    steam_id: string;
+    avatarUrl: string;
+    steamId: string;
     rating: number;
     isAdmin?: boolean;
 }
@@ -49,8 +49,8 @@ export default function Navbar() {
                     {!loading && (
                         user ? (
                             <div className="navbar-user">
-                                <Link href={`/profile/${user.steam_id}`} className="nav-link" onClick={() => setMobileMenuOpen(false)}>
-                                    <img src={user.avatar_url} alt="" className="navbar-avatar" />
+                                <Link href={`/profile/${user.steamId}`} className="nav-link" onClick={() => setMobileMenuOpen(false)}>
+                                    <img src={user.avatarUrl} alt="" className="navbar-avatar" />
                                     <span className="navbar-username">{user.username}</span>
                                 </Link>
                                 <span className="navbar-rating">
